@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import logger from "../utils/logger";
-import { AuthService } from "../modules/auth/auth.service";
-import { JWTPayload } from "../modules/auth/auth.types";
+import { JWTPayload } from "../modules/user/user.types";
+import { verifyToken } from "../modules/user/user.utils";
 export interface AuthRequest extends Request {
-    userId?: string;
+    userId?: number;
 }
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -11,11 +11,11 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
     if (!token) return res.status(401).json({ success: false, message: "Not authenticated" });
 
     try {
-        const decoded = AuthService.verifyAccessToken(token) as JWTPayload;
+        const decoded = verifyToken(token) as JWTPayload;
         req.userId = decoded.userId;
         next();
     } catch (err) {
-        logger.error("JWT token invalid of expired!", err)
+        logger.error("JWT token invalid or expired!", err)
         next(err)
     }
 };

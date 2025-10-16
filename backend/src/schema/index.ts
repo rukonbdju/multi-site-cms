@@ -5,10 +5,10 @@ export interface User {
     email: string;
     password: string;
     address?: string;
-    status: string; //default Inactive
-    isAdmin: boolean; //default false
-    createdAt: string; // auto on create
-    updatedAt: string; // auto on update
+    status: 'Active' | 'Inactive';
+    is_admin: boolean;
+    created_at: string;
+    updated_at: string;
 }
 
 //site schema
