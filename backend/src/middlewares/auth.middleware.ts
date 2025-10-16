@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import logger from "../utils/logger";
 import { JWTPayload } from "../modules/user/user.types";
 import { verifyToken } from "../modules/user/user.utils";
+
 export interface AuthRequest extends Request {
     userId?: number;
 }

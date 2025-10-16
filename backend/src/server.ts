@@ -11,7 +11,6 @@ const PORT = ENV.PORT;
 const app: Application = express();
 
 // Middlewares
-app.use(express.json());
 app.use(
     cors({
         origin: (origin, callback) => {
@@ -21,6 +20,7 @@ app.use(
         credentials: true,
     })
 );
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -29,7 +29,8 @@ app.use('/api/v1', router)
 
 // Global Error Handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-    logger.error(err.message);
+    console.log(err)
+    logger.error(err);
     res.status(err.status || 500).json(err);
 });
 
