@@ -1,155 +1,173 @@
 -- ============================================================
--- Initial CMS Database Migration
+-- Initial CMS Database Migration (PostgreSQL)
 -- ============================================================
-
--- Use UTF8MB4 for full Unicode support (e.g., emojis)
-CREATE DATABASE IF NOT EXISTS cms DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE cms;
 
 -- ============================================================
 -- USERS
 -- ============================================================
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(191) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     address VARCHAR(255),
-    status ENUM('Active', 'Inactive') DEFAULT 'Inactive',
+    status VARCHAR(20) DEFAULT 'Inactive' CHECK (status IN ('Active', 'Inactive')),
     is_admin BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_users_email (email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_users_email ON users (email);
 
 -- ============================================================
 -- SITES
 -- ============================================================
-CREATE TABLE IF NOT EXISTS sites (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+CREATE TABLE sites (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     domain VARCHAR(191) NOT NULL UNIQUE,
     logo VARCHAR(255),
     icon VARCHAR(255),
     title VARCHAR(150) NOT NULL,
     description TEXT,
-    status ENUM('enabled', 'disabled') DEFAULT 'disabled',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_sites_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_sites_user (user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    status VARCHAR(20) DEFAULT 'disabled' CHECK (status IN ('enabled', 'disabled')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
--- ============================================================
--- SITE LAYOUTS
--- ============================================================
-CREATE TABLE IF NOT EXISTS site_layouts (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    site_id INT NOT NULL,
-    column_count INT DEFAULT 1,
-    navbar INT,
-    footer INT,
-    CONSTRAINT fk_layouts_site FOREIGN KEY (site_id) REFERENCES sites(id) ON DELETE CASCADE,
-    CONSTRAINT fk_layouts_navbar FOREIGN KEY (navbar) REFERENCES sections(id),
-    CONSTRAINT fk_layouts_footer FOREIGN KEY (footer) REFERENCES sections(id),
-    INDEX idx_layouts_site (site_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE INDEX idx_sites_user ON sites (user_id);
 
 -- ============================================================
 -- COMPONENT GROUPS
 -- ============================================================
-CREATE TABLE IF NOT EXISTS component_groups (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    `group` VARCHAR(100) NOT NULL UNIQUE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE component_groups (
+    id SERIAL PRIMARY KEY,
+    "group" VARCHAR(100) NOT NULL UNIQUE
+);
 
 -- ============================================================
 -- COMPONENTS
 -- ============================================================
-CREATE TABLE IF NOT EXISTS components (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    group_id INT NOT NULL,
-    default_content JSON,
-    CONSTRAINT fk_components_group FOREIGN KEY (group_id) REFERENCES component_groups(id) ON DELETE CASCADE,
-    INDEX idx_components_group (group_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE components (
+    id SERIAL PRIMARY KEY,
+    group_id INT NOT NULL REFERENCES component_groups(id) ON DELETE CASCADE,
+    default_content JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_components_group ON components (group_id);
 
 -- ============================================================
 -- SECTIONS
 -- ============================================================
-CREATE TABLE IF NOT EXISTS sections (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    component_id INT NOT NULL,
-    content JSON,
-    CONSTRAINT fk_sections_component FOREIGN KEY (component_id) REFERENCES components(id) ON DELETE CASCADE,
-    INDEX idx_sections_component (component_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE sections (
+    id SERIAL PRIMARY KEY,
+    component_id INT NOT NULL REFERENCES components(id) ON DELETE CASCADE,
+    content JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_sections_component ON sections (component_id);
+CREATE INDEX idx_sections_content_jsonb ON sections USING GIN (content jsonb_path_ops);
+
+-- ============================================================
+-- SITE LAYOUTS
+-- ============================================================
+CREATE TABLE site_layouts (
+    id SERIAL PRIMARY KEY,
+    site_id INT NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+    column_count INT DEFAULT 1,
+    navbar INT REFERENCES sections(id),
+    footer INT REFERENCES sections(id)
+);
+
+CREATE INDEX idx_layouts_site ON site_layouts (site_id);
 
 -- ============================================================
 -- PAGES
 -- ============================================================
-CREATE TABLE IF NOT EXISTS pages (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    site_id INT NOT NULL,
+CREATE TABLE pages (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    site_id INT NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
     slug VARCHAR(255) NOT NULL,
     label VARCHAR(100) NOT NULL,
-    status ENUM('enabled', 'disabled') DEFAULT 'disabled',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_pages_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    CONSTRAINT fk_pages_site FOREIGN KEY (site_id) REFERENCES sites(id) ON DELETE CASCADE,
-    UNIQUE KEY uq_page_slug_site (site_id, slug),
-    INDEX idx_pages_site (site_id),
-    INDEX idx_pages_user (user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    status VARCHAR(20) DEFAULT 'disabled' CHECK (status IN ('enabled', 'disabled')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CONSTRAINT uq_page_slug_per_site UNIQUE (site_id, slug)
+);
+
+CREATE INDEX idx_pages_site ON pages (site_id);
+CREATE INDEX idx_pages_user ON pages (user_id);
 
 -- ============================================================
 -- PAGE SECTIONS
 -- ============================================================
-CREATE TABLE IF NOT EXISTS page_sections (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    page_id INT NOT NULL,
-    section_id INT NOT NULL,
-    `order` INT DEFAULT 1,
-    CONSTRAINT fk_page_sections_page FOREIGN KEY (page_id) REFERENCES pages(id) ON DELETE CASCADE,
-    CONSTRAINT fk_page_sections_section FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE,
-    INDEX idx_page_sections_page (page_id),
-    INDEX idx_page_sections_section (section_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE page_sections (
+    id SERIAL PRIMARY KEY,
+    page_id INT NOT NULL REFERENCES pages(id) ON DELETE CASCADE,
+    section_id INT NOT NULL REFERENCES sections(id) ON DELETE CASCADE,
+    "order" INT DEFAULT 1
+);
+
+CREATE INDEX idx_page_sections_page ON page_sections (page_id);
+CREATE INDEX idx_page_sections_section ON page_sections (section_id);
 
 -- ============================================================
 -- MEDIA
 -- ============================================================
-CREATE TABLE IF NOT EXISTS media (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    site_id INT NOT NULL,
-    user_id INT NOT NULL,
+CREATE TABLE media (
+    id SERIAL PRIMARY KEY,
+    site_id INT NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     file_name VARCHAR(255) NOT NULL,
     file_type VARCHAR(100) NOT NULL,
-    url VARCHAR(255) NOT NULL,
-    storage_path VARCHAR(255) NOT NULL,
-    size BIGINT UNSIGNED NOT NULL,
+    url VARCHAR(500) NOT NULL,
+    storage_path VARCHAR(500) NOT NULL,
+    size BIGINT NOT NULL CHECK (size >= 0),
     width INT,
     height INT,
     duration FLOAT,
     alt_text VARCHAR(255),
     caption VARCHAR(255),
-    tags JSON,
+    tags TEXT[] DEFAULT '{}',
     is_public BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_media_site FOREIGN KEY (site_id) REFERENCES sites(id) ON DELETE CASCADE,
-    CONSTRAINT fk_media_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_media_site (site_id),
-    INDEX idx_media_user (user_id),
-    INDEX idx_media_filename (file_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_media_site ON media (site_id);
+CREATE INDEX idx_media_user ON media (user_id);
+CREATE INDEX idx_media_filename ON media (file_name);
+CREATE INDEX idx_media_tags_gin ON media USING GIN (tags);
 
 -- ============================================================
--- Index Recommendations
+-- TRIGGERS FOR UPDATED_AT
 -- ============================================================
--- 1. Email and domain already indexed for uniqueness.
--- 2. site_id and user_id are indexed for quick joins.
--- 3. JSON fields (default_content, content, tags) can use MySQL 8 JSON indexing later if needed.
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+   NEW.updated_at = NOW();
+   RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apply trigger to all tables that have updated_at
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN
+        SELECT table_name FROM information_schema.columns
+        WHERE column_name = 'updated_at' AND table_schema = 'cms'
+    LOOP
+        EXECUTE format('CREATE TRIGGER set_updated_at_%I
+                        BEFORE UPDATE ON %I
+                        FOR EACH ROW
+                        EXECUTE FUNCTION update_updated_at_column();',
+                        r.table_name, r.table_name);
+    END LOOP;
+END $$;
+
