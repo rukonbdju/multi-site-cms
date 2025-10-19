@@ -1,6 +1,6 @@
 import { Site } from "@/layout/types";
 import { formatDate } from "@/utils/formate-date";
-import { Edit, Eye, FileText, LayoutGrid, Plus, Settings, Trash2 } from "lucide-react";
+import { ArrowRightFromLine, Edit, Eye, FileText, LayoutGrid, Plus, Settings, Trash2 } from "lucide-react";
 import { FC } from "react";
 const mockSites: Site[] = [
   { id: 1, name: 'Innovate Inc.', domain: 'innovate-inc.com', logo: 'https://placehold.co/64x64/3498db/ffffff?text=I', title: 'Innovate Inc. - Pushing the Boundaries of Technology', description: 'Our corporate homepage, showcasing the latest in tech innovation and our company milestones. Updated quarterly with new products.', status: 'active', createdAt: '2023-10-26T10:00:00Z', pageCount: 25 },
@@ -24,31 +24,31 @@ const SiteLogo: FC<{ logo?: string; name: string }> = ({ logo, name }) => (
   </div>
 );
 
-const IconButton: FC<{ icon: React.ElementType; className?: string; onClick?: () => void; }> = ({ icon: Icon, className = '', onClick }) => (
-  <button onClick={onClick} className={`p-2 rounded-md transition-colors duration-200 ${className}`} >
+const IconButton: FC<{ icon: React.ElementType; className?: string; onClick?: () => void; title?: string; }> = ({ icon: Icon, title, className = '', onClick }) => (
+  <button title={title} onClick={onClick} className={`p-2 rounded-md transition-colors duration-200 ${className}`} >
     <Icon className="h-5 w-5" />
   </button>
 );
 
 const SiteCard: FC<{ site: Site }> = ({ site }) => (
   <div className="group bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-lg dark:hover:shadow-blue-900/20 transition-all duration-300 flex flex-col">
-    <div className="p-5 flex items-start space-x-4">
+    <div className="p-5 flex items-start space-x-2">
       <SiteLogo logo={site.logo} name={site.name} />
       <div className="flex-grow min-w-0">
         <h3 className="text-lg font-bold text-gray-800 dark:text-white truncate">{site.name}</h3>
-        <a href={`//${site.domain}`} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 dark:text-blue-400 hover:underline break-all">
-          {site.domain}
-        </a>
+        <p className="text-xs text-gray-500">Created: {formatDate(site.createdAt)}</p>
       </div>
       <StatusBadge status={site.status} />
     </div>
-
     <div className="px-5 pb-5 flex-grow">
       <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-3">
         <FileText className="h-4 w-4 mr-2 flex-shrink-0 text-gray-400 dark:text-gray-500" />
         <span>{site.pageCount} {site.pageCount === 1 ? 'Page' : 'Pages'}</span>
       </div>
       <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 h-10">{site.description}</p>
+      <a href={`//${site.domain}`} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 dark:text-blue-400 hover:underline break-all">
+        {site.domain}
+      </a>
     </div>
 
     <div className="px-5 pb-1">
@@ -56,12 +56,14 @@ const SiteCard: FC<{ site: Site }> = ({ site }) => (
     </div>
 
     <div className="p-5 pt-3 flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
-      <span>Created: {formatDate(site.createdAt)}</span>
-      <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <IconButton icon={Eye} className="hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-500 dark:text-blue-400" />
-        <IconButton icon={Edit} className="hover:bg-yellow-100 dark:hover:bg-yellow-900/50 text-yellow-500 dark:text-yellow-400" />
-        <IconButton icon={Settings} className="hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400" />
-        <IconButton icon={Trash2} className="hover:bg-red-100 dark:hover:bg-red-900/50 text-red-500 dark:text-red-400" />
+      <div className="flex items-center space-x-1 opacity-100 transition-opacity duration-300">
+        <IconButton title="Preview" icon={Eye} className="hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-500 dark:text-blue-400" />
+        <IconButton title="Edit" icon={Edit} className="hover:bg-yellow-100 dark:hover:bg-yellow-900/50 text-yellow-500 dark:text-yellow-400" />
+        <IconButton title="Settings" icon={Settings} className="hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400" />
+        <IconButton title="Delete" icon={Trash2} className="hover:bg-red-100 dark:hover:bg-red-900/50 text-red-500 dark:text-red-400" />
+      </div>
+      <div>
+        <IconButton title="Details" icon={ArrowRightFromLine} className="hover:bg-green-100 dark:hover:bg-green-900/50 text-green-500 dark:text-green-400" />
       </div>
     </div>
   </div>
@@ -98,7 +100,7 @@ const SitesPage = () => {
         </div>
 
         {sites && sites.length > 0 ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
             {sites.map((site) => <SiteCard key={site.id} site={site} />)}
           </div>
         ) : (
