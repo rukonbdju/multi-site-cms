@@ -5,25 +5,17 @@ import { useSidebar } from "@/context/sidebar-context";
 import { MenuItemType } from "../types";
 
 const menuData: MenuItemType[] = [
-    { label: 'Home', href: '#', icon: Home },
-    { label: 'Analytics', href: '#', icon: BarChart2 },
+    { label: 'Home', href: '/', icon: Home, active: true },
+    { label: 'Sites', href: '/', icon: BarChart2 },
     {
-        label: 'Projects',
+        label: 'Pages',
         icon: Layers,
-        active: true, // Example of an active parent item
         children: [
-            { label: 'Active Projects', href: '#', active: true }, // Example of an active child item
-            { label: 'Archived', href: '#' },
-            {
-                label: 'Templates',
-                children: [
-                    { label: 'Web App', href: '#' },
-                    { label: 'E-commerce', href: '#' },
-                ]
-            },
+            { label: 'Home', href: '#', }, // Example of an active child item
+            { label: 'Blogs', href: '#' },
         ],
     },
-    { label: 'Deployments', href: '#', icon: Flag },
+    { label: 'Blogs', href: '#', icon: Flag },
     { label: 'Team', href: '#', icon: Users },
 ];
 
