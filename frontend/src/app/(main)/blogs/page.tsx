@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { FC, SVGProps } from 'react';
 import {
     Plus,
     Filter,
@@ -10,99 +9,13 @@ import {
     Edit,
     Archive,
     Trash2,
-    FileText,
     ChevronLeft,
     ChevronRight
 } from 'lucide-react';
-
-// --- TYPESCRIPT INTERFACES ---
-interface BlogPost {
-    id: number;
-    siteId: number;
-    authorId: number;
-    title: string;
-    slug: string;
-    excerpt: string;
-    status: 'draft' | 'published' | 'archived';
-    coverImage?: string;
-    createdAt: string;
-    updatedAt: string;
-}
-
-interface Site {
-    id: number;
-    name: string;
-    domain: string;
-    logo?: string;
-}
-
-interface User {
-    id: number;
-    name: string;
-    email: string;
-}
-
-// --- MOCK DATA ---
-const mockSites: Site[] = [
-    { id: 1, name: 'TechNova', domain: 'technova.com', logo: 'https://placehold.co/40x40/7c3aed/ffffff?text=T' },
-    { id: 2, name: 'EcoWorld', domain: 'ecoworld.org', logo: 'https://placehold.co/40x40/16a34a/ffffff?text=E' },
-    { id: 3, name: 'FinanceFeed', domain: 'financefeed.net', logo: 'https://placehold.co/40x40/db2777/ffffff?text=F' },
-];
-
-const mockUsers: User[] = [
-    { id: 1, name: 'Alice Johnson', email: 'alice@example.com' },
-    { id: 2, name: 'Bob Williams', email: 'bob@example.com' },
-    { id: 3, name: 'Charlie Brown', email: 'charlie@example.com' },
-];
-
-const mockPosts: BlogPost[] = [
-    { id: 1, siteId: 1, authorId: 1, title: 'The Future of AI in Web Development', slug: 'future-of-ai', excerpt: 'Exploring how AI is reshaping the landscape of web development...', status: 'published', coverImage: 'https://placehold.co/100x60/a78bfa/ffffff', createdAt: '2024-10-26', updatedAt: '2024-10-27' },
-    { id: 2, siteId: 2, authorId: 2, title: 'Sustainable Living: 10 Easy Tips', slug: 'sustainable-living', excerpt: 'Simple changes you can make for a more eco-friendly lifestyle.', status: 'published', coverImage: 'https://placehold.co/100x60/86efac/ffffff', createdAt: '2024-10-25', updatedAt: '2024-10-25' },
-    { id: 3, siteId: 3, authorId: 3, title: 'Q3 Market Analysis and Predictions', slug: 'q3-market-analysis', excerpt: 'A deep dive into the financial markets of the last quarter.', status: 'draft', coverImage: 'https://placehold.co/100x60/f9a8d4/ffffff', createdAt: '2024-10-24', updatedAt: '2024-10-26' },
-    { id: 4, siteId: 1, authorId: 1, title: 'Getting Started with Next.js 14', slug: 'nextjs-14-guide', excerpt: 'A comprehensive guide to the latest features in Next.js.', status: 'published', coverImage: 'https://placehold.co/100x60/a78bfa/ffffff', createdAt: '2024-10-22', updatedAt: '2024-10-23' },
-    { id: 5, siteId: 2, authorId: 2, title: 'The Importance of Urban Green Spaces', slug: 'urban-green-spaces', excerpt: 'How parks and gardens improve city life and the environment.', status: 'archived', coverImage: 'https://placehold.co/100x60/86efac/ffffff', createdAt: '2024-09-15', updatedAt: '2024-10-01' },
-    { id: 6, siteId: 3, authorId: 3, title: 'Cryptocurrency Trends to Watch in 2025', slug: 'crypto-trends-2025', excerpt: 'What to expect from the volatile world of digital currencies.', status: 'draft', coverImage: 'https://placehold.co/100x60/f9a8d4/ffffff', createdAt: '2024-10-28', updatedAt: '2024-10-28' },
-    { id: 7, siteId: 1, authorId: 1, title: 'Mastering TypeScript for Large-Scale Apps', slug: 'mastering-typescript', excerpt: 'Best practices for using TypeScript in enterprise applications.', status: 'published', coverImage: 'https://placehold.co/100x60/a78bfa/ffffff', createdAt: '2024-10-20', updatedAt: '2024-10-21' },
-    { id: 8, siteId: 2, authorId: 1, title: 'Community Gardening Initiatives', slug: 'community-gardening', excerpt: 'How local gardening projects are bringing communities together.', status: 'published', coverImage: 'https://placehold.co/100x60/86efac/ffffff', createdAt: '2024-10-18', updatedAt: '2024-10-19' },
-    { id: 9, siteId: 1, authorId: 2, title: 'Server Components vs. Client Components', slug: 'server-vs-client-components', excerpt: 'Understanding the key differences in the new React paradigm.', status: 'archived', coverImage: 'https://placehold.co/100x60/a78bfa/ffffff', createdAt: '2024-09-30', updatedAt: '2024-10-05' },
-    { id: 10, siteId: 3, authorId: 3, title: 'Retirement Planning for Millennials', slug: 'retirement-planning-millennials', excerpt: 'Strategies for building a solid nest egg in the modern economy.', status: 'published', coverImage: 'https://placehold.co/100x60/f9a8d4/ffffff', createdAt: '2024-10-15', updatedAt: '2024-10-15' },
-];
-
-
-// --- UI COMPONENTS ---
-
-const StatusBadge: FC<{ status: BlogPost['status'] }> = ({ status }) => {
-    const baseClasses = "px-2.5 py-0.5 text-xs font-semibold rounded-full inline-block";
-    const styles = {
-        published: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-        draft: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-        archived: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
-    };
-    return (
-        <span className={`${baseClasses} ${styles[status]}`}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-        </span>
-    );
-};
-
-const EmptyState: FC<{ onCreate: () => void }> = ({ onCreate }) => (
-    <div className="text-center py-16 px-6 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700">
-        <FileText className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
-        <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">No blog posts yet</h3>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating your first post.</p>
-        <div className="mt-6">
-            <button
-                onClick={onCreate}
-                type="button"
-                className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
-            >
-                <Plus className="h-4 w-4" />
-                Create New Post
-            </button>
-        </div>
-    </div>
-);
-
+import StatusBadge from '@/components/shared/status-badge';
+import EmptyState from '@/components/blogs/empty-state';
+import { mockPosts, mockSites, mockUsers } from '@/db/blogs';
+import BlogPostCard from '@/components/blogs/blog-card';
 
 // --- MAIN PAGE COMPONENT ---
 export default function BlogManagementPage() {
@@ -111,6 +24,7 @@ export default function BlogManagementPage() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [showFilters, setShowFilters] = useState(true);
+    const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
     const POSTS_PER_PAGE = 5;
 
@@ -204,94 +118,120 @@ export default function BlogManagementPage() {
 
                 {/* Blog Posts Table / Content Area */}
                 {paginatedPosts.length > 0 ? (
-                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-slate-700">
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
-                                <thead className="bg-gray-50 dark:bg-slate-700/50">
-                                    <tr>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cover</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Title</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Site</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Author</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Updated</th>
-                                        <th scope="col" className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
-                                    {paginatedPosts.map(post => {
-                                        const site = getSite(post.siteId);
-                                        const author = getUser(post.authorId);
-                                        return (
-                                            <tr key={post.id} className="hover:bg-gray-50/75 dark:hover:bg-slate-700/50 transition-colors group">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <img className="h-10 w-16 object-cover rounded-md" src={post.coverImage} alt={post.title} />
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm font-semibold text-gray-900 dark:text-white">{post.title}</div>
-                                                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate ">{post.excerpt}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center gap-2">
-                                                        <img className="h-6 w-6 rounded-full" src={site?.logo} alt={site?.name} />
-                                                        <span className="text-sm text-gray-800 dark:text-gray-300">{site?.name}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">{author?.name}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap"><StatusBadge status={post.status} /></td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{post.createdAt}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{post.updatedAt}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <button className="p-2 text-gray-500 hover:text-indigo-600 rounded-md hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-indigo-400"><Eye className="h-4 w-4" /></button>
-                                                        <button className="p-2 text-gray-500 hover:text-indigo-600 rounded-md hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-indigo-400"><Edit className="h-4 w-4" /></button>
-                                                        <button className="p-2 text-gray-500 hover:text-indigo-600 rounded-md hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-indigo-400"><Archive className="h-4 w-4" /></button>
-                                                        <button className="p-2 text-gray-500 hover:text-red-600 rounded-md hover:bg-red-50 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
+                    <div>
+
+                        {/* Desktop Table View */}
+                        <div className="hidden lg:block bg-white dark:bg-slate-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-slate-700">
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+                                    <thead className="bg-gray-50 dark:bg-slate-700/50">
+                                        <tr>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cover</th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Title</th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Site</th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Author</th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Updated</th>
+                                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
+                                        {paginatedPosts.map(post => {
+                                            const site = getSite(post.siteId);
+                                            const author = getUser(post.authorId);
+                                            return (
+                                                <tr key={post.id} className="hover:bg-gray-50/75 dark:hover:bg-slate-700/50 transition-colors group">
+                                                    <td className="px-6 py-4 ">
+                                                        <img className="h-10 w-16 object-cover rounded-md" src={post.coverImage} alt={post.title} />
+                                                    </td>
+                                                    <td className="px-6 py-4 max-w-sm">
+                                                        <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">{post.title}</div>
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{post.excerpt}</div>
+                                                    </td>
+                                                    <td className="px-6 py-4 ">
+                                                        <div className="flex items-center gap-2">
+                                                            <img className="h-6 w-6 rounded-full" src={site?.logo} alt={site?.name} />
+                                                            <span className="text-sm text-gray-800 dark:text-gray-300">{site?.name}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">{author?.name}</td>
+                                                    <td className="px-6 py-4 whitespace-nowrap"><StatusBadge status={post.status} /></td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{post.createdAt}</td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{post.updatedAt}</td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                        <div className="flex items-center justify-end gap-1">
+                                                            <button className="p-2 text-gray-500 hover:text-indigo-600 rounded-md hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-indigo-400"><Eye className="h-4 w-4" /></button>
+                                                            <button className="p-2 text-gray-500 hover:text-indigo-600 rounded-md hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-indigo-400"><Edit className="h-4 w-4" /></button>
+                                                            <button className="p-2 text-gray-500 hover:text-indigo-600 rounded-md hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-indigo-400"><Archive className="h-4 w-4" /></button>
+                                                            <button className="p-2 text-gray-500 hover:text-red-600 rounded-md hover:bg-red-50 dark:text-gray-400 dark:hover:bg-slate-700 dark:hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <nav className="flex items-center justify-between border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 sm:px-6">
+                                <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-700 dark:text-gray-400">
+                                            Showing <span className="font-medium text-gray-900 dark:text-white">{(currentPage - 1) * POSTS_PER_PAGE + 1}</span> to <span className="font-medium text-gray-900 dark:text-white">{Math.min(currentPage * POSTS_PER_PAGE, filteredPosts.length)}</span> of{' '}
+                                            <span className="font-medium text-gray-900 dark:text-white">{filteredPosts.length}</span> results
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                                            <button onClick={handlePrevPage} disabled={currentPage === 1} className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 dark:text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                <span className="sr-only">Previous</span>
+                                                <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+                                            </button>
+                                            <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-slate-600">
+                                                Page {currentPage} of {totalPages}
+                                            </span>
+                                            <button onClick={handleNextPage} disabled={currentPage === totalPages} className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 dark:text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                <span className="sr-only">Next</span>
+                                                <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                                            </button>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </nav>
                         </div>
 
-                        {/* Pagination */}
-                        <nav className="flex items-center justify-between border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 sm:px-6">
-                            <div className="flex flex-1 justify-between sm:hidden">
-                                <button onClick={handlePrevPage} disabled={currentPage === 1} className="relative inline-flex items-center rounded-md border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    Previous
-                                </button>
-                                <button onClick={handleNextPage} disabled={currentPage === totalPages} className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    Next
-                                </button>
-                            </div>
-                            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-700 dark:text-gray-400">
-                                        Showing <span className="font-medium text-gray-900 dark:text-white">{(currentPage - 1) * POSTS_PER_PAGE + 1}</span> to <span className="font-medium text-gray-900 dark:text-white">{Math.min(currentPage * POSTS_PER_PAGE, filteredPosts.length)}</span> of{' '}
-                                        <span className="font-medium text-gray-900 dark:text-white">{filteredPosts.length}</span> results
-                                    </p>
+                        {/* Mobile Card View */}
+                        <div className="lg:hidden space-y-4">
+                            {paginatedPosts.map(post => {
+                                const site = getSite(post.siteId);
+                                const author = getUser(post.authorId);
+                                return (
+                                    <BlogPostCard
+                                        key={post.id}
+                                        post={post}
+                                        site={site}
+                                        author={author}
+                                        openMenuId={openMenuId}
+                                        setOpenMenuId={setOpenMenuId}
+                                    />
+                                );
+                            })}
+                            <nav className="flex items-center justify-between border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 sm:px-6 rounded-b-lg">
+                                <div className="flex flex-1 justify-between">
+                                    <button onClick={handlePrevPage} disabled={currentPage === 1} className="relative inline-flex items-center rounded-md border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        Previous
+                                    </button>
+                                    <div className='flex items-center'>
+                                        <p className="text-sm text-gray-700 dark:text-gray-400">
+                                            <span className="font-medium text-gray-900 dark:text-white">{currentPage}</span> / <span className="font-medium text-gray-900 dark:text-white">{totalPages}</span>
+                                        </p>
+                                    </div>
+                                    <button onClick={handleNextPage} disabled={currentPage === totalPages} className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        Next
+                                    </button>
                                 </div>
-                                <div>
-                                    <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                                        <button onClick={handlePrevPage} disabled={currentPage === 1} className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 dark:text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed">
-                                            <span className="sr-only">Previous</span>
-                                            <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-                                        </button>
-                                        <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-slate-600">
-                                            Page {currentPage} of {totalPages}
-                                        </span>
-                                        <button onClick={handleNextPage} disabled={currentPage === totalPages} className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 dark:text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed">
-                                            <span className="sr-only">Next</span>
-                                            <ChevronRight className="h-5 w-5" aria-hidden="true" />
-                                        </button>
-                                    </nav>
-                                </div>
-                            </div>
-                        </nav>
-
+                            </nav>
+                        </div>
                     </div>
                 ) : (
                     <EmptyState onCreate={() => console.log('Create new post clicked!')} />

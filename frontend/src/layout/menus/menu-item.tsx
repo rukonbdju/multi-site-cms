@@ -1,6 +1,7 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { MenuItemProps } from "../types";
+import Link from "next/link";
 
 const MenuItem = ({ item, level, isShowing }: MenuItemProps) => {
     const hasChildren = item.children && item.children.length > 0;
@@ -39,9 +40,9 @@ const MenuItem = ({ item, level, isShowing }: MenuItemProps) => {
 
     return (
         <li>
-            <a href={item.href || '#'} className={`${baseItemClasses} ${activeClasses} p-2.5 ${!isShowing && 'justify-center'}`} style={{ paddingLeft: isShowing ? `${1 + level * 1.5}rem` : '0.625rem' }} >
+            <Link href={item.href || '#'} className={`${baseItemClasses} ${activeClasses} p-2.5 ${!isShowing && 'justify-center'}`} style={{ paddingLeft: isShowing ? `${1 + level * 1.5}rem` : '0.625rem' }} >
                 {itemContent}
-            </a>
+            </Link>
         </li>
     );
 }

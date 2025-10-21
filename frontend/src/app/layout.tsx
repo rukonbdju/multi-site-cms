@@ -1,8 +1,6 @@
 import { Outfit } from 'next/font/google';
 import './globals.css';
 
-import { SidebarProvider } from '@/context/sidebar-context';
-
 const outfit = Outfit({
   subsets: ["latin"],
 });
@@ -31,7 +29,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${outfit.className} dark:bg-gray-900`}>
-        <SidebarProvider>{children}</SidebarProvider>
+        {children}
       </body>
     </html>
   );

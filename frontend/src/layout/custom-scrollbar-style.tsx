@@ -1,8 +1,8 @@
 const CustomScrollbarStyles = () => (
     <style>{`
         .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 10px;
+            height: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
             background-color: transparent;
