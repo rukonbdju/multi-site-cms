@@ -1,28 +1,37 @@
-import { BarChart2, ChevronsLeft, Flag, Home, Layers, LifeBuoy, LogOut, Settings, Users } from "lucide-react";
+import { BriefcaseBusiness, ChevronsLeft, FileText, Flag, Globe, Home, LifeBuoy, Settings, Users } from "lucide-react";
 import NestedMenu from "../menus/nested-menu";
 import { useState } from "react";
 import { useSidebar } from "@/context/sidebar-context";
 import { MenuItemType } from "../types";
-import CustomImage from "@/components/shared/custom-image";
 
 const menuData: MenuItemType[] = [
     { label: 'Home', href: '/', icon: Home, active: true },
-    { label: 'Sites', href: '/', icon: BarChart2 },
+    { label: 'Users', href: '/users', icon: Users },
+    { label: 'Sites', href: '/sites', icon: Globe },
     {
         label: 'Pages',
-        icon: Layers,
+        icon: FileText,
         children: [
             { label: 'Home', href: '#', }, // Example of an active child item
             { label: 'Blogs', href: '#' },
         ],
     },
-    { label: 'Blogs', href: '#', icon: Flag },
-    { label: 'Team', href: '#', icon: Users },
+    {
+        label: 'Careers',
+        icon: BriefcaseBusiness,
+        children: [
+            { label: 'Jobs', href: '#' },
+            { label: 'Applicants', href: '#' },
+        ]
+    },
+    { label: 'Blogs', href: '/blogs', icon: Flag },
+    { label: 'Contacts', href: '#', icon: Users },
+    { label: 'Subscribers', href: '#', icon: Users },
 ];
 
 const bottomMenuData: MenuItemType[] = [
     { label: 'Support', href: '#', icon: LifeBuoy },
-    { label: 'Settings', href: '#', icon: Settings },
+    { label: 'Profile', href: '/profile', icon: Settings },
 ];
 
 const Sidebar = () => {
@@ -55,7 +64,7 @@ const Sidebar = () => {
                 <div className="mb-4">
                     <NestedMenu data={bottomMenuData} isShowing={isShowing} />
                 </div>
-                <div className={`rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-all duration-300 ${isShowing ? 'p-4' : 'p-2'}`}>
+                {/* <div className={`rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-all duration-300 ${isShowing ? 'p-4' : 'p-2'}`}>
                     <div className={`flex items-center ${!isShowing && 'justify-center'}`}>
                         <CustomImage
                             className={`rounded-full object-cover flex-shrink-0 transition-all duration-300 ${isShowing ? 'h-10 w-10' : 'h-8 w-8'}`}
@@ -77,7 +86,7 @@ const Sidebar = () => {
                             </>
                         )}
                     </div>
-                </div>
+                </div> */}
                 <button onClick={() => setIsDesktopExpanded(!isDesktopExpanded)} className="w-full mt-4 p-2 hidden lg:flex items-center justify-center rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-white transition-colors" title={isDesktopExpanded ? 'Collapse Sidebar' : 'Expand Sidebar'} >
                     <ChevronsLeft className={`h-6 w-6 transition-transform duration-300 ${!isDesktopExpanded && "rotate-180"}`} />
                 </button>

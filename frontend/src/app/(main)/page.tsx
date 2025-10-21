@@ -1,3 +1,4 @@
+import CustomImage from "@/components/shared/custom-image";
 import { Site } from "@/layout/types";
 import { formatDate } from "@/utils/formate-date";
 import { ArrowRightFromLine, Edit, Eye, FileText, LayoutGrid, Plus, Settings, Trash2 } from "lucide-react";
@@ -20,7 +21,7 @@ const StatusBadge: FC<{ status: Site['status'] }> = ({ status }) => {
 
 const SiteLogo: FC<{ logo?: string; name: string }> = ({ logo, name }) => (
   <div className="flex-shrink-0 h-14 w-14 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-bold text-xl overflow-hidden">
-    {logo ? <img src={logo} alt={`${name} logo`} className="h-full w-full object-cover" /> : <LayoutGrid className="h-7 w-7 text-gray-400" />}
+    {logo ? <CustomImage src={logo} alt={`${name} logo`} className="h-full w-full object-cover" /> : <LayoutGrid className="h-7 w-7 text-gray-400" />}
   </div>
 );
 
