@@ -16,6 +16,7 @@ import StatusBadge from '@/components/shared/status-badge';
 import EmptyState from '@/components/blogs/empty-state';
 import { mockPosts, mockSites, mockUsers } from '@/db/blogs';
 import BlogPostCard from '@/components/blogs/blog-card';
+import CustomImage from '@/components/shared/custom-image';
 
 // --- MAIN PAGE COMPONENT ---
 export default function BlogManagementPage() {
@@ -143,7 +144,12 @@ export default function BlogManagementPage() {
                                             return (
                                                 <tr key={post.id} className="hover:bg-gray-50/75 dark:hover:bg-slate-700/50 transition-colors group">
                                                     <td className="px-6 py-4 ">
-                                                        <img className="h-10 w-16 object-cover rounded-md" src={post.coverImage} alt={post.title} />
+                                                        <CustomImage
+                                                            className="h-10 w-16 object-cover rounded-md"
+                                                            src={post.coverImage || ""}
+                                                            alt={post.title}
+                                                        />
+
                                                     </td>
                                                     <td className="px-6 py-4 max-w-sm">
                                                         <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">{post.title}</div>
@@ -151,7 +157,11 @@ export default function BlogManagementPage() {
                                                     </td>
                                                     <td className="px-6 py-4 ">
                                                         <div className="flex items-center gap-2">
-                                                            <img className="h-6 w-6 rounded-full" src={site?.logo} alt={site?.name} />
+                                                            <CustomImage
+                                                                className="h-6 w-6 rounded-full"
+                                                                src={site?.logo || ""}
+                                                                alt={site?.name}
+                                                            />
                                                             <span className="text-sm text-gray-800 dark:text-gray-300">{site?.name}</span>
                                                         </div>
                                                     </td>

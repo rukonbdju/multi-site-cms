@@ -3,6 +3,7 @@ import NestedMenu from "../menus/nested-menu";
 import { useState } from "react";
 import { useSidebar } from "@/context/sidebar-context";
 import { MenuItemType } from "../types";
+import CustomImage from "@/components/shared/custom-image";
 
 const menuData: MenuItemType[] = [
     { label: 'Home', href: '/', icon: Home, active: true },
@@ -56,7 +57,7 @@ const Sidebar = () => {
                 </div>
                 <div className={`rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-all duration-300 ${isShowing ? 'p-4' : 'p-2'}`}>
                     <div className={`flex items-center ${!isShowing && 'justify-center'}`}>
-                        <img
+                        <CustomImage
                             className={`rounded-full object-cover flex-shrink-0 transition-all duration-300 ${isShowing ? 'h-10 w-10' : 'h-8 w-8'}`}
                             src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
                             alt="User avatar"

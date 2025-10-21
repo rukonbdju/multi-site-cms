@@ -2,6 +2,7 @@ import { FC } from "react";
 import { BlogPostCardProps } from "./types";
 import StatusBadge from "../shared/status-badge";
 import { Archive, Edit, Eye, MoreVertical, Trash2 } from "lucide-react";
+import CustomImage from "../shared/custom-image";
 
 
 const BlogPostCard: FC<BlogPostCardProps> = ({ post, site, author, openMenuId, setOpenMenuId }) => {
@@ -9,12 +10,16 @@ const BlogPostCard: FC<BlogPostCardProps> = ({ post, site, author, openMenuId, s
 
     return (
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md border border-gray-200 dark:border-slate-700 transition-shadow hover:shadow-lg">
-            {post.coverImage && <img className="h-32 w-full object-cover rounded-t-xl" src={post.coverImage} alt={post.title} />}
+            {post.coverImage && <CustomImage
+                className="h-32 w-full object-cover rounded-t-xl"
+                src={post.coverImage}
+                alt={post.title}
+            />}
             <div className="p-4">
                 <div className="flex items-center justify-between mb-2">
 
                     <div className="flex items-center gap-2">
-                        <img className="h-6 w-6 rounded-full" src={site?.logo} alt={site?.name} />
+                        <CustomImage className="h-6 w-6 rounded-full" src={site?.logo || ""} alt={site?.name} />
                         <span className="text-sm font-medium text-gray-800 dark:text-gray-300">{site?.name}</span>
                     </div>
                     <StatusBadge status={post.status} />
