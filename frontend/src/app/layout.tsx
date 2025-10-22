@@ -1,5 +1,6 @@
 import { Outfit } from 'next/font/google';
 import './globals.css';
+import StoreProvider from '@/lib/store/store-provider';
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -29,7 +30,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${outfit.className} dark:bg-gray-900`}>
-        {children}
+        <StoreProvider>{children}</StoreProvider>
       </body>
     </html>
   );
