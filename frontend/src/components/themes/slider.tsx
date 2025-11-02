@@ -11,7 +11,7 @@ const slidesData = [
         title: "Reliable IPS & High-Speed Internet Under One Roof",
         description: "From uninterrupted electricity to ultra-fast broadband, we empower homes and businesses across Bangladesh.",
         buttonText: "Discover Our Services",
-        image: "/corporate.jpg",
+        image: "/slide/family-laughing-together-using-laptop-home.jpg",
         bgColor: "bg-red-50",
         textColor: "text-red-800",
         buttonColor: "bg-red-600 hover:bg-red-700",
@@ -20,7 +20,7 @@ const slidesData = [
         title: "Your Business Deserves 100% Uptime",
         description: "Boost productivity with dedicated corporate bandwidth, static IP, and 24/7 priority support—crafted for offices, SMEs, and enterprises.",
         buttonText: "Discover Our Services",
-        image: "/office.jpg",
+        image: "/slide/full-shot-family-laying-floor.jpg",
         bgColor: "bg-pink-50",
         textColor: "text-pink-800",
         buttonColor: "bg-pink-600 hover:bg-pink-700",
@@ -29,7 +29,7 @@ const slidesData = [
         title: "Dedicated Corporate Bandwidth & Support",
         description: "Experience stable, secure, and high-speed internet tailored for offices, call centers, SMEs, and enterprises",
         buttonText: "Get a Corporate Plan",
-        image: "/office.jpg",
+        image: "/slide/office-female.png",
         bgColor: "bg-orange-50",
         textColor: "text-orange-800",
         buttonColor: "bg-orange-600 hover:bg-orange-700",
@@ -38,7 +38,7 @@ const slidesData = [
         title: "Buffer-Free Streaming & Work From Home Ready",
         description: "Ultra-fast internet with seamless video calls, gaming, and streaming—perfect for modern households.",
         buttonText: "View Our Packages",
-        image: "/corporate.jpg",
+        image: "/slide/people-enjoying-festive-christmas-dinner.jpg",
         bgColor: "bg-violet-50",
         textColor: "text-violet-800",
         buttonColor: "bg-violet-600 hover:bg-violet-700",
@@ -222,7 +222,7 @@ const Slider = () => {
                     <button
                         key={index}
                         onClick={() => handleDotClick(index)}
-                        className={`inline-block h-2 cursor-pointer rounded-full transition-all duration-300 ${index == currentIndex ? 'w-6 bg-teal-400' : 'w-4 bg-teal-600'
+                        className={`inline-block h-2 cursor-pointer rounded-full transition-all duration-300 ${index == currentIndex ? 'w-6 bg-red-400' : 'w-4 bg-red-600'
                             }`}
                         aria-label={`Go to slide ${index + 1}`}
                     />

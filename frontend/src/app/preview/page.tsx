@@ -1,5 +1,6 @@
 import FeatureA from "@/components/themes/features/feature-a";
 import FeatureB from "@/components/themes/features/feature-b";
+import FeatureC from "@/components/themes/features/feature-c";
 import Footer from "@/components/themes/footers/footer-a";
 import { Navbar } from "@/components/themes/navbar";
 import NewsletterA from "@/components/themes/newsletter-sections/newsletter-a";
@@ -39,6 +40,7 @@ const Preview = () => {
             <FeatureA />
             <NewsletterA />
             <FeatureB />
+            <FeatureC />
             <Footer />
         </div>
     )

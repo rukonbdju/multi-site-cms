@@ -41,17 +41,17 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ item, iconComponent: Icon }) 
     return (
         <div className="flex flex-col bg-white p-8 rounded-2xl shadow-xl border border-gray-100 group
                     transition-all duration-500 ease-in-out transform
-                    hover:-translate-y-2 hover:shadow-2xl hover:border-blue-300
+                    hover:-translate-y-2 hover:shadow-2xl hover:border-red-300
                     relative overflow-hidden
-                    before:absolute before:inset-0 before:bg-gradient-to-br before:from-transparent before:via-transparent before:to-blue-50 before:opacity-0 group-hover:before:opacity-100 before:transition-opacity before:duration-500">
+                    before:absolute before:inset-0 before:bg-gradient-to-br before:from-transparent before:via-transparent before:to-red-50 before:opacity-0 group-hover:before:opacity-100 before:transition-opacity before:duration-500">
 
             {/* Icon/Image with Gradient Background */}
             <div className="flex justify-center mb-6 relative z-10">
-                <div className="p-4 rounded-full bg-blue-500 bg-opacity-10 backdrop-blur-sm
-                        border border-blue-200 transition-all duration-300
-                        group-hover:bg-blue-600 group-hover:bg-opacity-20 group-hover:border-blue-400">
+                <div className="p-4 rounded-full bg-red-500 bg-opacity-10 backdrop-blur-sm
+                        border border-red-200 transition-all duration-300
+                        group-hover:bg-red-600 group-hover:bg-opacity-20 group-hover:border-red-400">
                     {Icon ? (
-                        <Icon size={48} className="text-blue-600 group-hover:text-blue-700 transition-colors duration-300" />
+                        <Icon size={48} className="text-red-200 group-hover:text-red-300 transition-colors duration-300" />
                     ) : (
                         <img
                             src={item.photo}
@@ -74,11 +74,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ item, iconComponent: Icon }) 
             <div className="flex justify-center mt-auto relative z-10">
                 <a
                     href={item.path}
-                    className="inline-flex items-center justify-center gap-2 text-sm text-blue-600 cursor-pointer
-                     bg-blue-50 hover:bg-blue-100 px-6 py-3 rounded-full font-semibold
+                    className="inline-flex items-center justify-center gap-2 text-sm text-red-600 cursor-pointer
+                     bg-red-50 hover:bg-red-100 px-6 py-3 rounded-full font-semibold
                      transition-all duration-300 ease-in-out transform
-                     border border-blue-200 hover:border-blue-400
-                     group-hover:text-blue-700 group-hover:scale-105"
+                     border border-red-200 hover:border-red-400
+                     group-hover:text-red-700 group-hover:scale-105"
                 >
                     View Details
                     <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-300" />
@@ -95,7 +95,7 @@ const ServicesCom: React.FC<ServicesComProps> = ({ services }) => {
         <div className="bg-gradient-to-br from-indigo-50 to-purple-50 py-20 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
                 <h2 className="text-5xl font-extrabold text-center text-gray-900 mb-6 leading-tight">
-                    Red Data comes with a <span className="text-blue-700">wide</span> array of services
+                    Red Data comes with a <span className="text-red-700">wide</span> array of services
                 </h2>
                 <p className="text-xl text-center text-gray-700 mb-16 max-w-3xl mx-auto">
                     Explore our comprehensive range of services designed to empower your digital life and business with cutting-edge technology.

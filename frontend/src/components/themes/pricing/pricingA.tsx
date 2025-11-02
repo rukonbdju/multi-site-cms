@@ -3,7 +3,7 @@
 import React from 'react';
 import {
     Wifi,
-    CheckCircle, // Changed ChevronsRight to CheckCircle for a more modern "feature list" look
+    CheckCircle,
     ArrowRight,
 } from 'lucide-react';
 
@@ -11,18 +11,19 @@ import {
 
 /**
  * Defines the structure for a single pricing package.
+ * 'isFeatured' is new, for styling the "Best Value" card.
+ * 'features' array replaces hardcoded list items.
  */
 interface Package {
     id: string | number;
-    feature: boolean;
-    accentColor: string; // Renamed from colorText to accentColor for clarity
-    priceIncVAT: string | number;
+    showOnHome: boolean; // Was 'feature', renamed for clarity
+    isFeatured: boolean; // New: for highlighting a specific card
+    accentColor: string;
+    price: string | number; // Was 'priceIncVAT'
     tag: string;
     packageName: string;
     bandwidth: string | number;
-    otc: string | number;
-    minPlusPhone: string | number;
-    vas: string;
+    features: string[]; // New: for a data-driven feature list
 }
 
 /**
@@ -44,110 +45,96 @@ interface PricingPackageProps {
 // --- 1. REUSABLE PRICING CARD COMPONENT ---
 
 const PricingCard: React.FC<PricingCardProps> = ({ item, onChoosePackage }) => {
-    return (
-        <div className="relative flex flex-col justify-between p-8 rounded-xl shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] bg-white group w-full">
-            {/* Price Badge - Reverted to SVG Ribbon */}
-            <div className="absolute -right-[20px] -top-4 ">
-                <div className="relative h-full w-full">
-                    {/* svg */}
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        version="1.1"
-                        xmlnsXlink="http://www.w3.org/1999/xlink"
-                        width="120"
-                        height="120"
-                        x="0"
-                        y="0"
-                        viewBox="0 0 512 512"
+    // We can use the accentColor directly in style props.
+    // We'll set the border-top-color directly for the featured card.
+    const cardStyle = {
+        ...(item.isFeatured && { borderTop: `4px solid ${item.accentColor}` })
+    } as React.CSSProperties;
 
-                        xmlSpace="preserve"
-                    >
-                        <g>
-                            <path
-                                d="M384 0H149.333c-41.237 0-74.667 33.429-74.667 74.667v426.667a10.668 10.668 0 0 0 6.592 9.856c1.291.538 2.676.813 4.075.811a10.663 10.663 0 0 0 7.552-3.115l120.448-120.619C260.48 434.795 325.44 499.2 332.416 507.136c3.261 4.906 9.882 6.24 14.788 2.979a10.67 10.67 0 0 0 3.964-4.835 6.53 6.53 0 0 0 .832-3.947v-448c0-17.673 14.327-32 32-32 5.891 0 10.667-4.776 10.667-10.667S389.891 0 384 0z"
-                                style={{ fill: item.accentColor }}
-                            />
-                            <path
-                                d="M394.667 0c23.564 0 42.667 19.103 42.667 42.667v32c0 5.891-4.776 10.667-10.667 10.667H352V42.667C352 19.103 371.103 0 394.667 0z"
-                                style={{ fill: item.accentColor }}
-                            />
-                        </g>
-                    </svg>
-                    {/* Price */}
-                    <div className="absolute left-7 top-5 flex flex-col text-xl font-semibold text-white">
-                        <span>
+    return (
+        <div
+            style={cardStyle}
+            className={`
+                relative flex flex-col rounded-2xl shadow-lg bg-white transition-all duration-300 ease-in-out
+                ${item.isFeatured ? '' : 'border border-gray-200'}
+            `}
+        >
+            {/* "Most Popular" Badge - only shown if isFeatured is true */}
+            {item.isFeatured && (
+                <div
+                    className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-white"
+                    style={{ backgroundColor: item.accentColor }}
+                >
+                    Most Popular
+                </div>
+            )}
+
+            <div className="p-8 flex flex-col justify-between h-full">
+                {/* Top Section: Header & Price */}
+                <div>
+                    {/* Icon and Tag */}
+                    <div className="flex items-center mb-4">
+                        <Wifi size={32} className="mr-3" style={{ color: item.accentColor }} />
+                        <p className="text-sm font-medium text-gray-500">{item.tag}</p>
+                    </div>
+
+                    {/* Package Name */}
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                        {item.packageName}
+                    </h3>
+
+                    {/* Price - More prominent and modern layout */}
+                    <div className="flex items-baseline mb-6">
+                        <span className="text-5xl font-extrabold text-gray-900">
                             {/* Using Taka text symbol */}
-                            <sub className="font-normal text-white text-lg mr-0.5">৳</sub>
-                            <span className="text-white">{item.priceIncVAT}</span>
+                            <sub className="font-normal text-4xl mr-0.5 align-baseline">৳</sub>
+                            {item.price}
                         </span>
-                        <span className="text-xs font-normal text-white">/month</span>
+                        <span className="text-lg text-gray-500 ml-1">/month</span>
                     </div>
                 </div>
-            </div>
 
-            <div className="mb-6">
-                {/* Icon and Tag */}
-                <div className="flex items-center mb-4">
-                    <Wifi size={32} style={{ color: item.accentColor }} className="mr-3" />
-                    <p className="text-sm font-medium text-gray-500">{item.tag}</p>
-                </div>
+                {/* Middle Section: Features List (Now data-driven) */}
+                {/* flex-grow ensures this section expands, pushing the button to the bottom */}
+                <ul className="space-y-3 text-gray-700 text-base mb-8 flex-grow">
+                    {/* Special item for Bandwidth */}
+                    <li className="flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                        <span><span className="font-semibold">{item.bandwidth} Mbps</span> Bandwidth</span>
+                    </li>
 
-                {/* Package Name */}
-                <h3 className="text-3xl font-extrabold mb-6" style={{ color: item.accentColor }}>
-                    {item.packageName}
-                </h3>
-
-                {/* Features List */}
-                <ul className="space-y-3 text-gray-700 text-base">
+                    {/* Dynamically rendered features from the 'features' array */}
+                    {item.features.map((feature, index) => (
+                        <li key={index} className="flex items-center gap-2">
+                            <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                            {feature}
+                        </li>
+                    ))}
                     <li className="flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        <span className="font-semibold">{item.bandwidth} Mbps</span> Bandwidth
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        Unlimited devices
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        OTC: {item?.otc} Taka
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        {item?.minPlusPhone} Min TalkTime
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        {item?.vas}
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 text-green-500" />
+                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
                         24x7 Customer Care
                     </li>
                 </ul>
-            </div>
 
-            {/* Choose Package Button */}
-            <div className="mt-8">
-                <button
-                    onClick={() => onChoosePackage(item)}
-                    className="w-full py-3 px-6 rounded-lg text-sm font-semibold flex items-center justify-center gap-2
-                     border transition-colors duration-300"
-                    style={{
-                        borderColor: item.accentColor,
-                        color: item.accentColor,
-                        backgroundColor: 'white',
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = item.accentColor;
-                        e.currentTarget.style.color = 'white';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'white';
-                        e.currentTarget.style.color = item.accentColor;
-                    }}
-                >
-                    Choose Package <ArrowRight className="w-4 h-4" />
-                </button>
+                {/* Bottom Section: Button */}
+                {/* mt-auto ensures the button is always at the bottom of the card */}
+                <div className="mt-auto">
+                    <button
+                        onClick={() => onChoosePackage(item)}
+                        className={`
+                            w-full py-3 px-6 rounded-lg text-base font-semibold flex items-center justify-center gap-2
+                            transition-all duration-300 ease-in-out
+                            ${item.isFeatured
+                                ? 'text-white shadow-md hover:brightness-95'
+                                : 'border border-gray-300 text-gray-800 hover:bg-gray-50'
+                            }
+                        `}
+                        // Apply background-color directly for the featured button
+                        style={item.isFeatured ? { backgroundColor: item.accentColor } : {}}
+                    >
+                        Choose Package <ArrowRight className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -157,18 +144,21 @@ const PricingCard: React.FC<PricingCardProps> = ({ item, onChoosePackage }) => {
 
 const PricingPackage: React.FC<PricingPackageProps> = ({ packages, onChoosePackage }) => {
     return (
-        <div className="bg-gradient-to-br from-gray-50 to-white py-16 px-4 sm:px-6 lg:px-8">
+        <div className="bg-gray-50 py-16 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
                 <h2 className="text-4xl font-extrabold text-center text-gray-900 mb-4">
-                    Our <span className="text-blue-600">Popular</span> Packages
+                    Our <span className="text-red-600">Popular</span> Packages
                 </h2>
                 <p className="text-lg text-center text-gray-600 mb-12 max-w-2xl mx-auto">
                     Choose the perfect plan that fits your needs and enjoy high-speed internet with great benefits.
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+                {/* We filter by 'showOnHome' to control which packages appear on this page.
+                    The 'isFeatured' prop will handle the styling for the highlighted card.
+                */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-stretch items-stretch">
                     {packages
-                        .filter(item => item.feature) // Only show featured packages
+                        .filter(item => item.showOnHome) // Only show packages marked for the homepage
                         .map((item) => (
                             <PricingCard
                                 key={item.id}
@@ -179,8 +169,8 @@ const PricingPackage: React.FC<PricingPackageProps> = ({ packages, onChoosePacka
                 </div>
 
                 <div className="mt-16 text-center">
-                    <a href='/home-internet' className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300">
-                        See All Packages <ArrowRight className="w-4 h-4 ml-2" />
+                    <a href='/home-internet' className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-300">
+                        See All Packages <ArrowRight className="w-5 h-5 ml-2" />
                     </a>
                 </div>
             </div>
@@ -190,65 +180,72 @@ const PricingPackage: React.FC<PricingPackageProps> = ({ packages, onChoosePacka
 
 // --- 3. EXAMPLE APP (MAIN COMPONENT) ---
 
-// Mock data (as in the original)
+// Mock data updated with 'isFeatured' and 'features' array
 const mockPackages: Package[] = [
     {
         id: 1,
-        feature: true,
+        showOnHome: true,
+        isFeatured: false, // Not featured
         accentColor: "#FF5733", // Orange-red
-        priceIncVAT: "500",
+        price: "500",
         tag: "Home User",
         packageName: "Starter Plan",
-        bandwidth: 100, // Increased for modern context
-        otc: 1000,
-        minPlusPhone: 50,
-        vas: "Basic Streaming Access"
+        bandwidth: 100,
+        features: [
+            "1,000 Taka OTC",
+            "50 Min TalkTime",
+            "Basic Streaming Access"
+        ]
     },
     {
         id: 2,
-        feature: true,
-        accentColor: "#33CC57", // Green
-        priceIncVAT: "1000",
+        showOnHome: true,
+        isFeatured: true, // This one IS featured
+        accentColor: "#e7000b", // Red
+        price: "1000",
         tag: "Power User",
         packageName: "Pro Connect",
-        bandwidth: 250, // Increased
-        otc: 500,
-        minPlusPhone: 100,
-        vas: "Premium Gaming & Streaming"
+        bandwidth: 250,
+        features: [
+            "500 Taka OTC",
+            "100 Min TalkTime",
+            "Premium Gaming & Streaming",
+            "Priority Support"
+        ]
     },
     {
         id: 3,
-        feature: true,
-        accentColor: "#3366FF", // Blue
-        priceIncVAT: "2000",
+        showOnHome: true,
+        isFeatured: false, // Not featured
+        accentColor: "#33CC57", // Green
+        price: "2000",
         tag: "Family Plan",
         packageName: "Ultimate Fiber",
-        bandwidth: 500, // Increased
-        otc: 0,
-        minPlusPhone: 200,
-        vas: "All Access Entertainment Pack"
+        bandwidth: 500,
+        features: [
+            "No OTC",
+            "200 Min TalkTime",
+            "All Access Entertainment Pack"
+        ]
     },
     {
         id: 4,
-        feature: false, // This one won't be shown
+        showOnHome: false, // This one won't be shown on this page
+        isFeatured: false,
         accentColor: "#FF33A1",
-        priceIncVAT: "300",
+        price: "300",
         tag: "Lite",
         packageName: "Basic",
         bandwidth: 50,
-        otc: 1500,
-        minPlusPhone: 0,
-        vas: "No VAS"
+        features: ["1,500 Taka OTC"]
     },
 ];
 
-// Mock context/function (as in the original)
-// This simulates the `toggleModal` from your StoreContext
+// Mock context/function
+// Removed alert() as it's generally not used in "pro" apps.
 const handleChoosePackage = (item: Package) => {
     console.log("Choosing package:", item.packageName);
-    // In your app, you would call `toggleModal()` here.
-    // We use console.log here for demonstration.
-    alert(`You chose the "${item.packageName}" package!`);
+    // In your app, you would call `toggleModal(item)` here.
 };
 
 /**
@@ -256,15 +253,11 @@ const handleChoosePackage = (item: Package) => {
  */
 const PricingA: React.FC = () => {
     return (
-        <div className="">
-            {/* You can add other parts of your page here (e.g., Navbar, Hero) */}
-
+        <div className="font-inter antialiased">
             <PricingPackage
                 packages={mockPackages}
                 onChoosePackage={handleChoosePackage}
             />
-
-            {/* You can add other parts of your page here (e.g., Footer) */}
         </div>
     );
 };
