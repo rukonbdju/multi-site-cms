@@ -1,4 +1,9 @@
+import FeatureA from "@/components/themes/features/feature-a";
+import FeatureB from "@/components/themes/features/feature-b";
+import Footer from "@/components/themes/footers/footer-a";
 import { Navbar } from "@/components/themes/navbar";
+import NewsletterA from "@/components/themes/newsletter-sections/newsletter-a";
+import PricingA from "@/components/themes/pricing/pricingA";
 import Slider from "@/components/themes/slider";
 
 // 1. Define your navigation items.
@@ -27,9 +32,14 @@ const navigationData = [
 
 const Preview = () => {
     return (
-        <div>
+        <div className="bg-white">
             <Navbar navItems={navigationData} />
             <Slider />
+            <PricingA />
+            <FeatureA />
+            <NewsletterA />
+            <FeatureB />
+            <Footer />
         </div>
     )
 }
