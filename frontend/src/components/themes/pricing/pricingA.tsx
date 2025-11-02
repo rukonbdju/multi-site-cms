@@ -6,6 +6,7 @@ import {
     CheckCircle,
     ArrowRight,
 } from 'lucide-react';
+import { DynamicIcon } from '@/lib/icon/dynamic-icon';
 
 // --- TYPE DEFINITIONS ---
 
